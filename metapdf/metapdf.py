@@ -35,7 +35,8 @@ __author__ = "Ali Anari"
 __author_email__ = "ali@alianari.com"
 
 
-import os, re
+import re
+import os
 from pyPdf import PdfFileReader
 
 
@@ -49,8 +50,8 @@ class _meta_pdf_reader(object):
     def read_metadata(self, stream):
 
         """This function reads a PDF file stream and returns its metadata.
-        :param file_name: The PDF file stream to read.
-        :type file_name: str
+        :param stream: The PDF file stream to read.
+        :type stream: file stream
         :returns: dict -- The returned metadata as a dictionary of properties.
 
         """
@@ -59,12 +60,12 @@ class _meta_pdf_reader(object):
         # frequent metadata density block
         stream.seek(-self.metadata_offset, os.SEEK_END)
         try:
-            properties = dict(('/' + p.group(1), p.group(2).decode('utf-8')) \
-                for p in self.metadata_regex.finditer(stream.read(self.metadata_offset)))
+            properties = dict(('/' + p.group(1), p.group(2).decode('utf-8'))
+                              for p in self.metadata_regex.finditer(stream.read(self.metadata_offset)))
             if '/Author' in properties:
                 return properties
         except UnicodeDecodeError:
-            properties.clear()
+            pass
 
         # Parse the xref table using pyPdf
         properties = PdfFileReader(stream).documentInfo
@@ -74,4 +75,7 @@ class _meta_pdf_reader(object):
         return {}
 
 _metaPdfReader = _meta_pdf_reader()
-def MetaPdfReader(): return _metaPdfReader
+
+
+def MetaPdfReader():
+    return _metaPdfReader
